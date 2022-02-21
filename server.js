@@ -1,10 +1,36 @@
+require('dotenv').config()
+console.log(process.env.MONGO_URI)
 const express = require('express');
+const mongoose=require('mongoose');
+// const { findOneAndUpdate } = require('./models/fruits');
+// const { findOneAndUpdate } = require('./models/vegetables');
 const app = express();
-const fruits=require('./models/fruits');
-const vegetables = require('./models/vegetables');
+const Fruit=require('./models/fruits');
+const Vegetable = require('./models/vegetables');
+
+
+// const createEngine=reactviews.createEngine
+// const renderFile=createEngine()
+
+//MVC SETUP
+//Views
 app.set('view engine', 'jsx');
 app.engine('jsx', require('express-react-views').createEngine());
 
+
+
+//Models
+mongoose.connect(process.env.MONGO_URI,{
+    useNewUrlParser:true,
+    useUnifiedTopology:true,
+    
+})
+
+
+// mongoose.connect(process.env.MONGO_URI2,{
+//     useNewUrlParser:true,
+//     useUnifiedTopology:true,
+// }) 
 
 // MIDDLEWARE
 app.use(express.urlencoded({extended:true}))
@@ -29,15 +55,34 @@ app.use((req,res,next)=>{
 
 // 7 Restful route === INDEX NEW DELETE UPDATE CREATE EDIT SHOW
 
-//INDEX  Weedk 10 day 3
+//INDEX  Weedk 10 day 3/ changed on 11day2
 app.get('/fruits',(req,res)=>{
     // res.send(fruits)
-    res.render('fruits/Index',{ fruits })
+  Fruit.find({}, (err, foundFruits)=>{
+      if(err){
+          res.status(400).send(err)
+      }else{
+          res.render('fruits/Index',{
+              fruits: foundFruits
+          })
+      }
+  })
 });
+
+//INDEX Vegetables
 
 app.get('/vegetables',(req,res)=>{
     // res.send(fruits)
-    res.render('vegetables/Index',{ vegetables })
+
+    Vegetable.find({}, (err, foundVegetables)=>{
+        if(err){
+            res.status(400).send(err)
+        }else{
+            res.render('vegetables/Index',{
+                vegetables: foundVegetables
+            })
+        }
+    })
 });
 
 
@@ -59,17 +104,25 @@ app.get('/vegetables/new',(req,res)=>{
 
 
 
-//CREATE Week 11 day 1
+//CREATE Week 11 day 1/updated week 11 day 2
 app.post('/fruits',(req, res)=>{
     if(req.body.readyToEat==='on'){
         req.body.readyToEat=true
     }else{
         req.body.readyToEat=false
     }
-    fruits.push(req.body)
-    res.redirect('/fruits')
+
+    Fruit.create(req.body,(err, createdFruit)=>{
+        if(err){
+            res.status(403).send(err)
+        }else{
+            console.log(createdFruit)
+            res.redirect('/fruits')
+        }
+    })
 })
 
+//Create Vegetables
 
 app.post('/vegetables',(req,res)=>{
     if(req.body.readyToEat==='on'){
@@ -77,24 +130,47 @@ app.post('/vegetables',(req,res)=>{
     }else{
         req.body.readyToEat=false
     }
-    vegetables.push(req.body)
+
+    Vegetable.create(req.body,(err, createdVegetable)=>{
+        if(err){
+            res.status(403).send(err)
+        }else{
+            console.log(createdVegetable)
+            res.redirect('/vegetables')
+        }
+    })
 })
 // EDIT
 
 
 
-//SHOW
-app.get('/fruits/:indexOfFruitsArray',(req,res)=>{
+//SHOW week10day3 updated on week11day2
+app.get('/fruits/:id',(req,res)=>{
     // res.send(fruits[req.params.indexOfFruitsArray])
-    res.render('fruits/Show',{
-        fruit:fruits[req.params.indexOfFruitsArray]
+    Fruit.findById(req.params.id, (err,foundFruit)=>{
+        if (err){
+            res.status(400).send(err)
+        }else{
+            res.render('fruits/Show',{
+                fruit:foundFruit
+            })
+        }
     })
 })
 
 
-app.get('/vegetables/:indexOfVegetablesArray',(req,res)=>{
-    res.render('vegetables/Show',{
-    vegetable:vegetables[req.params.indexOfVegetablesArray]
+
+
+
+
+
+app.get('/vegetables/:id',(req,res)=>{
+    Vegetable.findById(req.params.id, (err,foundVegetable)=>{
+        if (err){
+            res.status(400).send(err)
+        }else{res.render('vegetables/Show',{
+            vegetable:foundVegetable
+        })}
     })
 })
 

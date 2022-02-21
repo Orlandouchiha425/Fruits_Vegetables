@@ -12,9 +12,9 @@ class Index extends React.Component {
                 
                 <ul>
                 {
-                    fruits.map((fruit, i) => {
+                    fruits.map((fruit) => {
                         return (
-                            <li><a href={`/fruits/${i}`}>{fruit.name}</a> is the color of {fruit.color}</li>
+                            <li key={`${fruit._id}`}><a href={`/fruits/${fruit._id}`}>{fruit.name}</a> is the color of {fruit.color}</li>
                         )
                     })
                 }
